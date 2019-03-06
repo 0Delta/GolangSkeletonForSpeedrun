@@ -21,12 +21,13 @@ func getLine() string {
 func main() {
 	inp := getLine()
 	sinp := strings.Split(inp, ",")
-	
+
 	// TODO : Something code
 	sum := 0
-	for _, n := range sinp{
-		sum += stringconv.Stoi(n)
+	for _, n := range sinp {
+		m, _ := strconv.Atoi(n)
+		sum += m
 	}
-	
-  fmt.Print(sum)
+
+	fmt.Print(sum)
 }
