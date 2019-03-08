@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -17,15 +17,21 @@ func captureStdout(f func()) string {
 	stdout := os.Stdout
 	os.Stdout = w
 
+	outC := make(chan string)
+	defer close(outC)
+	go func() {
+		var buf strings.Builder
+		io.Copy(&buf, r)
+		r.Close()
+		outC <- buf.String()
+	}()
+
 	f()
 
 	os.Stdout = stdout
 	w.Close()
 
-	var buf bytes.Buffer
-	io.Copy(&buf, r)
-
-	return buf.String()
+	return <-outC
 }
 
 func Test_main(t *testing.T) {
@@ -35,7 +41,7 @@ func Test_main(t *testing.T) {
 	}{
 		{"1,2", "3"},
 		{"3,3", "6"},
-		{"3,3", "0"},	// This case will return FAIL.
+		{"3,3", "0"}, // This case will return FAIL.
 		// TODO: Add test cases.
 	}
 	argsbuf := os.Args
@@ -51,4 +57,3 @@ func Test_main(t *testing.T) {
 		})
 	}
 }
-
